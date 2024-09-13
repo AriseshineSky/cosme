@@ -7,7 +7,7 @@ from resources.base_spider import BaseSpider
 
 
 class CategorySpider(BaseSpider):
-    name = "category-url"
+    name = "category"
     allowed_domains = ["cosme.com"]
     start_urls = ["https://www.cosme.com"]
 

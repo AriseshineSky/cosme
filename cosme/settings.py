@@ -1,6 +1,4 @@
-import os
-from resources import settings
-import os
+from em_product.resources import settings
 
 # Scrapy settings for cosme project
 #
@@ -69,9 +67,6 @@ COOKIES_DEBUG = True
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 
-MONGO_START_URLS_ITEM = {
-    "start_urls": True,
-}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
@@ -102,27 +97,10 @@ TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"
 FEED_EXPORT_ENCODING = "utf-8"
 
 
-MONGO_URI = settings.MONGO_URI
-MONGO_DATABASE = "cosme"
-
 MYSQL_URI = f"{settings.MYSQL_URI}/everymarket"
 
 # LOG_FILE = "log/cosme.log"
 LOG_LEVEL = "INFO"
-DOWNLOADER_MIDDLEWARES = {
-    "scrapy_random_ua.RandomUserAgentMiddleware": 400,
-    "scrapy_webshare.middleware.WebshareMiddleware": 500,
-}
-WEBSHARE_ENABLED = True
-
-WEBSHARE_USER = os.getenv("WEBSHARE_USER")
-WEBSHARE_PASSWORD = os.getenv("WEBSHARE_PASSWORD")
-WEBSHARE_COUNTRY = os.getenv("WEBSHARE_COUNTRY", "US")
-
-DOWNLOADER_MIDDLEWARES = {
-    "scrapy.contrib.downloadermiddleware.useragent.UserAgentMiddleware": None,
-    "scrapy_webshare.middleware.WebshareMiddleware": 500,
-}
 
 DOWNLOADER_CLIENT_TLS_CIPHERS = settings.DOWNLOADER_CLIENT_TLS_CIPHERS
 ELASTICSEARCH_SERVERS = settings.ELASTICSEARCH_SERVERS
@@ -132,7 +110,12 @@ ELASTICSEARCH_TIMEOUT = settings.ELASTICSEARCH_TIMEOUT
 ELASTICSEARCH_MAX_RETRY = settings.ELASTICSEARCH_MAX_RETRY
 
 
+DOWNLOADER_MIDDLEWARES = {
+    "scrapy.contrib.downloadermiddleware.useragent.UserAgentMiddleware": None,
+    "scrapy_random_ua.RandomUserAgentMiddleware": 400,
+    "scrapy_webshare.middleware.WebshareMiddleware": 500,
+}
 WEBSHARE_ENABLED = True
-WEBSHARE_USER = os.getenv("WEBSHARE_USER")
-WEBSHARE_PASSWORD = os.getenv("WEBSHARE_PASSWORD")
-WEBSHARE_COUNTRY = os.getenv("WEBSHARE_COUNTRY", "US")
+WEBSHARE_USER = settings.WEBSHARE_USER
+WEBSHARE_PASSWORD = settings.WEBSHARE_PASSWORD
+WEBSHARE_COUNTRY = settings.WEBSHARE_COUNTRY
