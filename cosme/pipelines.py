@@ -6,7 +6,15 @@
 
 # useful for handling different item types with a single interface
 
-from resources.pipelines import ESCategoryPipeline, ESProductUrlPipeline, ESProductPipeline
+
+from em_product.resources.pipelines import (
+    ESCategoryPipeline,
+    ESProductUrlPipeline,
+    ESProductPipeline,
+    ESProductRecrawlPipeline,
+    ESTranslationPipeline,
+    ESSeedProductPipeline,
+)
 
 
 class CategoryPipeline(ESCategoryPipeline):
@@ -23,3 +31,8 @@ class ProductPipeline(ESProductPipeline):
     PRODUCT_URL_INDEX = "cosme_product_urls"
     PRODUCT_INDEX = "cosme_products"
     ELASTICSEARCH_INDEX = "cosme_products"
+
+
+class TranslationPipeline(ESTranslationPipeline):
+    TRANSLATION_INDEX = "cosme_translation"
+    ELASTICSEARCH_INDEX = TRANSLATION_INDEX

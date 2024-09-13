@@ -314,6 +314,4 @@ class ProductSpider(BaseSpider):
         item["variants"] = None
         item["options"] = None
 
-        print("*** item :", item)
-
         yield item
