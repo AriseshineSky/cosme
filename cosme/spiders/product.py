@@ -12,11 +12,11 @@ class ProductSpider(scrapy.Spider):
     allowed_domains = ["www.cosme.com"]
     start_urls = []
 
-    custom_settings = {
-        "ITEM_PIPELINES": {
-            "cosme.pipelines.ProductPipeline": 400,
-        }
-    }
+    # custom_settings = {
+    #     "ITEM_PIPELINES": {
+    #         "cosme.pipelines.ProductPipeline": 400,
+    #     }
+    # }
 
     HEADERS = {
         "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
@@ -91,41 +91,28 @@ class ProductSpider(scrapy.Spider):
 
         return shipping_fee
 
-    def get_reviews(self, selector):
-        i_num_review = None
-
-        review_text = selector.xpath("//div[@class='unique-product-rate-count']/text()").get()
-        if review_text:
-            num_list = self.extractDigitListFromStr(review_text)
-            if len(num_list) > 0:
-                i_num_review = num_list[0]
-
-        return i_num_review
-
-    def get_images(self, selector):
+    def get_images(self, response: HtmlResponse):
         str_images = ""
-
         conv_list_images = []
 
-        list_images = []
-        list_images.append(selector.xpath("//div[@class='product-details-img']/a/@href").get())
-        list_images.extend(selector.xpath("//ul[@class='product__thumb-list']//img/@src").getall())
-
+        list_images = response.xpath("//ul[@class='product__thumb-list']//img/@src").getall()
         for x in list_images:
             if "?" in x:
                 x = x.split("?")[0]
             if "https" not in x:
-                conv_list_images.append("https://www.cosme.com{}".format(x))
+                x = 'https://www.cosme.com'+x
+            x = x.replace('_360.', '_800.')
+            conv_list_images.append(x)
 
         if len(conv_list_images) > 0:
             str_images = ";".join(conv_list_images)
 
         return str_images
 
-    def get_sku(self, selector):
-        return selector.xpath("//meta[@itemprop='sku']/@content").get()
+    def get_sku(self, response: HtmlResponse):
+        return response.xpath("//meta[@itemprop='sku']/@content").get()
 
-    def get_description(self, selector):
+    def get_description(self, selector: HtmlResponse):
         desc = None
         desc = selector.xpath("//div[@itemprop='description']").get()
         desc = self.remove_a_tag_replace_content(desc)
@@ -142,7 +129,7 @@ class ProductSpider(scrapy.Spider):
         tdx = response.css('dl.product-desc > dd')
 
         for th, td in zip(thx, tdx):
-            if th and ('コスメ' not in th):
+            if th and ('コスメ' not in th) and (th != 'JANコード'):
                 if th == 'ブランド名':
                     brand_txt = td.css('a::text').get()
                     if brand_txt:
@@ -151,13 +138,13 @@ class ProductSpider(scrapy.Spider):
                     cats_txts = td.css(':scope a::text').getall()
                     if cats_txts:
                         cats = " > ".join(cats_txts)
-                elif td:
+                elif td.css('::text').get():
                     specs.append({
                         "name": th,
                         "value": td,
                     })
                     if th == 'サイズ':
-                        weight = self.get_weight(td)
+                        weight = self.get_weight(td.css('::text').get().lower())
 
         return (specs if specs else None), brand, cats, weight
 
@@ -169,7 +156,7 @@ class ProductSpider(scrapy.Spider):
             elif weight_match[1] in {'kg', 'l'}:
                 return round(float(weight_match[0])*2.20462, 2)
 
-    def get_reviews_num(self, response: HtmlResponse):
+    def get_reviews(self, response: HtmlResponse):
         src_reviews = response.css('div.unique-product-rate-count::text').get()
         if not src_reviews:
             return
@@ -181,14 +168,22 @@ class ProductSpider(scrapy.Spider):
         src_rating = response.xpath("//span[@class='unique-product-rating-point']/text()").get()
         if not src_rating:
             return
-        f_src_rating = float(src_rating)
 
-        conv_rating = (int(((f_src_rating / 7.0) * 5.0) * 10)) / 10
-        return conv_rating
+        f_src_rating = float(src_rating)
+        if f_src_rating <= 1.0:
+            return 1.00
+
+        conv_rating = f_src_rating * 5.0 / 7.0
+        return round(conv_rating, 2)
 
     def parse(self, response: HtmlResponse):
         existence = self.get_exist(response)
         specifications, brand, categories, weight = self.get_specifications_etc(response)
+
+        images = self.get_images(response)
+        if not images:
+            print("Skip no images")
+            return
 
         item = {
             "date": datetime().strftime('%Y-%m-%dT%H:%M:%S'),
@@ -208,7 +203,7 @@ class ProductSpider(scrapy.Spider):
             "categories": categories,
             "images": self.get_images(response),
             "videos": None,
-            "price": price,
+            "price": self.get_price(response),
             "available_qty": 0 if not existence else None,
             "options": None,
             "variants": None,
