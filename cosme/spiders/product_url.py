@@ -1,15 +1,14 @@
 from datetime import datetime
-import scrapy
-from cosme.items import ProductUrlItem
-
 from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 
-from resources.base_spider import BaseSpider
+import scrapy
+
+from cosme.items import ProductUrlItem
 
 
-class ProductUrlSpider(BaseSpider):
+class ProductUrlSpider(scrapy.Spider):
     name = "product-url"
-    allowed_domains = ["cosme.com"]
+    allowed_domains = ["www.cosme.com"]
     start_urls = []
 
     custom_settings = {
@@ -127,7 +126,7 @@ class ProductUrlSpider(BaseSpider):
 
     def crawl_product_urls(self, url, category_id, page):
         return scrapy.Request(
-            url=new_url,
+            url=url,
             method="GET",
             headers=self.get_headers(),
             cookies=self.cookies,

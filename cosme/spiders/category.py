@@ -1,14 +1,14 @@
 from datetime import datetime
+from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
+
 import scrapy
+
 from cosme.items import CategoryUrlItem
 
-from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
-from resources.base_spider import BaseSpider
 
-
-class CategorySpider(BaseSpider):
+class CategorySpider():
     name = "category"
-    allowed_domains = ["cosme.com"]
+    allowed_domains = ["www.cosme.com"]
     start_urls = ["https://www.cosme.com"]
 
     custom_settings = {

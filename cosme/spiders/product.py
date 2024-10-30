@@ -1,16 +1,11 @@
 from datetime import datetime
-import json
 import re
-import os
+
 import scrapy
 import scrapy.selector
-from cosme.items import ProductItem
-from cosme.product_manager import formatter
 from bs4 import BeautifulSoup
 
-from urllib.parse import urlparse, urlunparse
-
-from resources.base_spider import BaseSpider
+# from resources.base_spider import BaseSpider
 
 
 class ProductSpider(BaseSpider):
