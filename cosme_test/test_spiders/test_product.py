@@ -1,3 +1,7 @@
+import os
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+
 import unittest
 
 from scrapy.utils.test import get_crawler
@@ -6,6 +10,8 @@ from scrapy.http import HtmlResponse
 from cosme.spiders.product import ProductSpider
 
 
+# cd ~/cosme
+# python3 cosme_test/test_spiders/test_product.py
 class TestProduct(unittest.TestCase):
     def setUp(self):
         self.crawler = get_crawler(ProductSpider)
@@ -15,7 +21,7 @@ class TestProduct(unittest.TestCase):
         url = "https://www.cosme.com/products/detail.php?product_id=338794"
         body = None
         with open(
-            "338794.html",
+            "cosme_test/pages/338794.html",
             "rb",
         ) as file:
             body = file.read()
@@ -32,7 +38,7 @@ class TestProduct(unittest.TestCase):
             "url": "https://www.cosme.com/products/detail.php?product_id=338794",
             "product_id": "338794",
             "existence": True,
-            "title": "色鮮やかなリキッドアイカラー。ひときわ輝くスパークルEYE。",
+            "title": "リキッド アイカラー / 本体 / 600 / 2.5g",
             "sku": "4969527504636",
             "upc": "4969527504636",
             "brand": "アナ スイ / ANNA SUI",
@@ -61,12 +67,13 @@ class TestProduct(unittest.TestCase):
         }
         for key in target_product:
             self.assertEqual(product[key], target_product[key])
+        print(product['description'])
 
     def test_available_product_2(self):
         url = "https://www.cosme.com/products/detail.php?product_id=341692"
         body = None
         with open(
-            "341692.html",
+            "cosme_test/pages/341692.html",
             "rb",
         ) as file:
             body = file.read()
@@ -112,12 +119,13 @@ class TestProduct(unittest.TestCase):
         }
         for key in target_product:
             self.assertEqual(product[key], target_product[key])
+        print(product['description'])
 
     def test_available_product_3(self):
         url = "https://www.cosme.com/products/detail.php?product_id=303287"
         body = None
         with open(
-            "303287.html",
+            "cosme_test/pages/303287.html",
             "rb",
         ) as file:
             body = file.read()
@@ -159,12 +167,13 @@ class TestProduct(unittest.TestCase):
         }
         for key in target_product:
             self.assertEqual(product[key], target_product[key])
+        print(product['description'])
 
     def test_available_product_4(self):
         url = "https://www.cosme.com/products/detail.php?product_id=311668"
         body = None
         with open(
-            "311668.html",
+            "cosme_test/pages/311668.html",
             "rb",
         ) as file:
             body = file.read()
@@ -182,12 +191,12 @@ class TestProduct(unittest.TestCase):
             "product_id": "311668",
             "existence": True,
             "title": "雪肌精 クリアウェルネス 敏感肌用化粧水 キット / 125mL+35mL / 無香料",
-            "sku": "4936968814372",
-            "upc": "4936968814372",
-            "brand": "シュウ ウエムラ / shu uemura",
+            "sku": "4971710569971",
+            "upc": "4971710569971",
+            "brand": "雪肌精",
             "specifications": [
                 {
-                    "name": "香り",
+                    "name": "サイズ",
                     "value": "125mL+35mL"
                 },
                 {
@@ -196,22 +205,23 @@ class TestProduct(unittest.TestCase):
                 }
             ],
             "categories": "スキンケア・基礎化粧品 > 化粧水",
-            "images": "https://www.cosme.com/upload/save_image/product/00/30/32/86/303286_1_800.jpg;https://www.cosme.com/upload/save_image/product/00/30/32/86/303286_2_800.jpg;https://www.cosme.com/upload/save_image/product/00/30/32/86/303286_3_800.jpg;https://www.cosme.com/upload/save_image/product/00/30/32/86/303286_4_800.jpg;https://www.cosme.com/upload/save_image/product/00/30/32/86/303286_5_800.jpg",
-            "price": 37.30,
+            "images": "https://www.cosme.com/upload/save_image/product/00/31/16/67/311667_1_800.jpg;https://www.cosme.com/upload/save_image/product/00/31/16/67/311667_2_800.jpg;https://www.cosme.com/upload/save_image/product/00/31/16/67/311667_3_800.jpg",
+            "price": 15.78,
             "available_qty": None,
             "reviews": None,
             "rating": None,
-            "shipping_fee": 0.00,
+            "shipping_fee": 2.08,
             "weight": 0.28
         }
         for key in target_product:
             self.assertEqual(product[key], target_product[key])
+        print(product['description'])
   
     def test_unavailable_product(self):
         url = "https://www.cosme.com/products/detail.php?product_id=347482"
         body = None
         with open(
-            "347482.html",
+            "cosme_test/pages/347482.html",
             "rb",
         ) as file:
             body = file.read()
@@ -228,7 +238,7 @@ class TestProduct(unittest.TestCase):
             "url": "https://www.cosme.com/products/detail.php?product_id=347482",
             "product_id": "347482",
             "existence": False,
-            "title": "夏のベタつく肌に。限定ミントセージの香りで爽快クレンジング",
+            "title": "クレンジングミルクセージ / 130mL / 爽快なミントセージの香り",
             "sku": "4934976192765",
             "upc": "4934976192765",
             "brand": "チャントアチャーム / chant a charm",
@@ -253,6 +263,7 @@ class TestProduct(unittest.TestCase):
         }
         for key in target_product:
             self.assertEqual(product[key], target_product[key])
+        print(product['description'])
 
 
 if __name__ == "__main__":

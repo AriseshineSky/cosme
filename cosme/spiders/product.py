@@ -75,11 +75,11 @@ class ProductSpider(scrapy.Spider):
         return not stockout_sel
 
     def get_title(self, response: HtmlResponse):
-        return response.xpath("//p[@class='product__lead']/text()").get()
+        return response.xpath("//h1[@class='product__name']/text()").get('')
 
     def get_price(self, response: HtmlResponse):
-        jpy_price = response.xpath("//span[@itemprop='price']/@content").get()
-        return round(jpy_price*self.jpy_rate, 2)
+        jpy_price = response.xpath("//span[@itemprop='price']/@content").get('0')
+        return round(float(jpy_price)/self.jpy_rate, 2)
 
     def get_shipping_fee(self, response: HtmlResponse):
         condition_list = response.xpath("//ul[@class='product-condition-list']/li/text()").getall()
@@ -87,7 +87,7 @@ class ProductSpider(scrapy.Spider):
         if "送料無料" in condition_list:
             shipping_fee = 0.00
         else:
-            shipping_fee = round(319*self.jpy_rate, 2)
+            shipping_fee = round(319/self.jpy_rate, 2)
 
         return shipping_fee
 
@@ -116,11 +116,13 @@ class ProductSpider(scrapy.Spider):
         desc = None
         desc = selector.xpath("//div[@itemprop='description']").get()
         desc = self.remove_a_tag_replace_content(desc)
+        desc = " ".join(desc.split())
 
-        return desc
+        return f'<div class="cosme-descr">{desc}</div>' if desc else ""
 
     def get_specifications_etc(self, response: HtmlResponse):
         specs = []
+        add_descr = ""
         brand = None
         cats = None
         weight = None
@@ -139,22 +141,30 @@ class ProductSpider(scrapy.Spider):
                     if cats_txts:
                         cats = " > ".join(cats_txts)
                 elif td.css('::text').get():
-                    specs.append({
-                        "name": th,
-                        "value": td,
-                    })
-                    if th == 'サイズ':
-                        weight = self.get_weight(td.css('::text').get().lower())
+                    td = td.css('::text').get()
+                    if ('成分' in th) or ('方法' in th) or ('注意' in th):
+                        add_descr += f'<tr><th>{th}</th><td>{td}</td></tr>'
+                    else:
+                        specs.append({
+                            "name": th,
+                            "value": td,
+                        })
+                        if th == 'サイズ':
+                            weight = self.get_weight(td.lower())
 
-        return (specs if specs else None), brand, cats, weight
+        return (
+            (specs if specs else None),
+            (f'<table descr="cosme-descr">{add_descr}</table>' if add_descr else ''),
+            brand, cats, weight
+        )
 
     def get_weight(self, txt: str):
         weight_match = re.findall(r'(\d+(?:\.\d+)?)\s*(g|ml|kg|l)', txt)
         if weight_match:
-            if weight_match[1] in {'g', 'ml'}:
-                return round(float(weight_match[0])/453.59237, 2)
-            elif weight_match[1] in {'kg', 'l'}:
-                return round(float(weight_match[0])*2.20462, 2)
+            if weight_match[0][1] in {'g', 'ml'}:
+                return round(float(weight_match[0][0])/453.59237, 2)
+            elif weight_match[0][1] in {'kg', 'l'}:
+                return round(float(weight_match[0][0])*2.20462, 2)
 
     def get_reviews(self, response: HtmlResponse):
         src_reviews = response.css('div.unique-product-rate-count::text').get()
@@ -178,7 +188,8 @@ class ProductSpider(scrapy.Spider):
 
     def parse(self, response: HtmlResponse):
         existence = self.get_exist(response)
-        specifications, brand, categories, weight = self.get_specifications_etc(response)
+        specifications, add_descr, brand, categories, weight = self.get_specifications_etc(response)
+        descriptions = self.get_description(response)+add_descr
 
         images = self.get_images(response)
         if not images:
@@ -186,14 +197,14 @@ class ProductSpider(scrapy.Spider):
             return
 
         item = {
-            "date": datetime().strftime('%Y-%m-%dT%H:%M:%S'),
+            "date": datetime.now().strftime('%Y-%m-%dT%H:%M:%S'),
             "url": response.url,
             "source": "cosme",
             "product_id": self.get_prod_id(response.url),
             "existence": existence,
             "title": self.get_title(response),
             "title_en": None,
-            "description": self.get_description(response),
+            "description": descriptions if descriptions else None,
             "description_en": None,
             "summary": None,
             "sku": self.get_sku(response),
