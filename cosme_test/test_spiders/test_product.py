@@ -160,6 +160,53 @@ class TestProduct(unittest.TestCase):
         for key in target_product:
             self.assertEqual(product[key], target_product[key])
 
+    def test_available_product_4(self):
+        url = "https://www.cosme.com/products/detail.php?product_id=311668"
+        body = None
+        with open(
+            "311668.html",
+            "rb",
+        ) as file:
+            body = file.read()
+
+        response = HtmlResponse(
+            url=url,
+            body=body,
+            encoding="utf-8",
+        )
+        result = list(self.spider.parse(response))
+        self.assertEqual(len(result), 1)
+        product = result[0]
+        target_product = {
+            "url": "https://www.cosme.com/products/detail.php?product_id=311668",
+            "product_id": "311668",
+            "existence": True,
+            "title": "雪肌精 クリアウェルネス 敏感肌用化粧水 キット / 125mL+35mL / 無香料",
+            "sku": "4936968814372",
+            "upc": "4936968814372",
+            "brand": "シュウ ウエムラ / shu uemura",
+            "specifications": [
+                {
+                    "name": "香り",
+                    "value": "125mL+35mL"
+                },
+                {
+                    "name": "香り",
+                    "value": "無香料"
+                }
+            ],
+            "categories": "スキンケア・基礎化粧品 > 化粧水",
+            "images": "https://www.cosme.com/upload/save_image/product/00/30/32/86/303286_1_800.jpg;https://www.cosme.com/upload/save_image/product/00/30/32/86/303286_2_800.jpg;https://www.cosme.com/upload/save_image/product/00/30/32/86/303286_3_800.jpg;https://www.cosme.com/upload/save_image/product/00/30/32/86/303286_4_800.jpg;https://www.cosme.com/upload/save_image/product/00/30/32/86/303286_5_800.jpg",
+            "price": 37.30,
+            "available_qty": None,
+            "reviews": None,
+            "rating": None,
+            "shipping_fee": 0.00,
+            "weight": 0.28
+        }
+        for key in target_product:
+            self.assertEqual(product[key], target_product[key])
+  
     def test_unavailable_product(self):
         url = "https://www.cosme.com/products/detail.php?product_id=347482"
         body = None
@@ -182,21 +229,21 @@ class TestProduct(unittest.TestCase):
             "product_id": "347482",
             "existence": False,
             "title": "夏のベタつく肌に。限定ミントセージの香りで爽快クレンジング",
-            "sku": "4936968814372",
-            "upc": "4936968814372",
+            "sku": "4934976192765",
+            "upc": "4934976192765",
             "brand": "チャントアチャーム / chant a charm",
             "specifications": [
                 {
-                    "name": "タイプ",
-                    "value": "本体"
+                    "name": "サイズ",
+                    "value": "130mL"
                 },
                 {
-                    "name": "サイズ",
-                    "value": "150mL"
-                }
+                    "name": "香り",
+                    "value": "爽快なミントセージの香り"
+                },
             ],
-            "categories": "スキンケア・基礎化粧品 > クレンジング > クレンジングオイル",
-            "images": "https://www.cosme.com/upload/save_image/product/00/30/32/86/303286_1_800.jpg;https://www.cosme.com/upload/save_image/product/00/30/32/86/303286_2_800.jpg;https://www.cosme.com/upload/save_image/product/00/30/32/86/303286_3_800.jpg;https://www.cosme.com/upload/save_image/product/00/30/32/86/303286_4_800.jpg;https://www.cosme.com/upload/save_image/product/00/30/32/86/303286_5_800.jpg",
+            "categories": "スキンケア・基礎化粧品 > クレンジング > クレンジングミルク",
+            "images": "https://www.cosme.com/upload/save_image/product/00/34/74/81/347481_1_800.jpg",
             "price": 20.09,
             "available_qty": 0,
             "reviews": 4,
